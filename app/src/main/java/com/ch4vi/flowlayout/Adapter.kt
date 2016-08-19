@@ -4,6 +4,7 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 
 
 class Adapter(private val data: Array<String>) : RecyclerView.Adapter<Adapter.ViewHolder>() {
@@ -17,6 +18,7 @@ class Adapter(private val data: Array<String>) : RecyclerView.Adapter<Adapter.Vi
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        holder.text.text = data[position]
 //        holder.primaryTag.text = data[position]
 //        holder.secondaryTag.text = "## ${data[position]}"
 //        holder.membersCount.text = "$position"
@@ -24,6 +26,7 @@ class Adapter(private val data: Array<String>) : RecyclerView.Adapter<Adapter.Vi
     }
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val text: TextView = view.findViewById(R.id.text_view) as TextView
 //        val primaryTag: TextView = view.findViewById(R.id.primary_tag) as TextView
 //        val secondaryTag: TextView = view.findViewById(R.id.secondary_tag) as TextView
 //        val membersCount: TextView = view.findViewById(R.id.members_count) as TextView
