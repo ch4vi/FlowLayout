@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("com.ch4vi.flowlayoutmanager.test", appContext.getPackageName());
+        assertEquals("flowlayoutmanager.test", appContext.getPackageName());
     }
 }
