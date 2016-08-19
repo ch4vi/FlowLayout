@@ -8,18 +8,21 @@ import android.support.v7.widget.LinearSmoothScroller
 import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.view.View
+import flowlayoutmanager.R
 import android.support.v7.widget.RecyclerView.LayoutManager as BaseLayoutManager
 
 
 class FlowLayoutManager(
-        private val numberOfColumns: Int,
+        private val numberOfDivisions: Int,
+        private val orientation: Int = RecyclerView.VERTICAL,
         private val anInterface: Interface
-) : BaseLayoutManager() {
+) : RecyclerView.LayoutManager() {
     private val TAG = this.javaClass.simpleName
     private val rectList: MutableList<Rect> = mutableListOf()
     private val viewToItemIndexMap: MutableMap<View, Int> = mutableMapOf()
     private val visibleChildren: MutableSet<Int> = mutableSetOf()
     private var verticalOffset: Int = 0
+    private var horizontalOffset: Int = 0
 
     // region Layout Interface
 
@@ -114,30 +117,42 @@ class FlowLayoutManager(
         layoutChildren(recycler)
     }
 
-    private fun layoutChildren(recycler: RecyclerView.Recycler) {
-        val viewCache = detachAllChildren()
-        visibleChildren.forEach { itemIndex ->
-            val cachedView = viewCache[itemIndex]
-            if (cachedView == null) {
-                val view = recycler.getViewForPosition(itemIndex)
-                val rect = rectList[itemIndex]
-                view.layoutParams.width = rect.width()
-                view.layoutParams.height = rect.height()
-                addView(view)
-                viewToItemIndexMap[view] = itemIndex
-                measureChildWithMargins(view, 0, 0)
-                val top = rect.top - verticalOffset
-                val bottom = rect.bottom - verticalOffset
-                layoutDecorated(view, rect.left, top, rect.right, bottom)
-            } else {
-                attachView(cachedView)
-                viewCache.remove(itemIndex)
-            }
+    private fun updateLayout() {
+        rectList.clear()
+        var offset: LayoutState
+        if (orientation == RecyclerView.VERTICAL) {
+            offset = VerticalLayoutState()
+        } else {
+            offset = HorizontalLayoutState()
         }
-
-        viewCache.forEach { entry ->
-            viewToItemIndexMap.remove(entry.value)
-            recycler.recycleView(entry.value)
+        if (orientation == RecyclerView.VERTICAL) {
+            for (i in 0..itemCount - 1) {
+                var (width, height) = anInterface.getSizeForChild(i)
+                if (offset.x <= 0) {
+                    width += availableWidth - numberOfDivisions * columnWidth
+                }
+                val nextOffset = offset.pivot(width, height)
+                if (nextOffset != null) {
+                    offset = nextOffset
+                    rectList.add(Rect(offset.x, offset.y, offset.x + width, offset.y + height))
+                } else {
+                    rectList.add(Rect(0, 0, 0, 0))
+                }
+            }
+        } else {
+            for (i in 0..itemCount - 1) {
+                var (width, height) = anInterface.getSizeForChild(i)
+                if (offset.y <= 0) {
+                    height += availableHeight - numberOfDivisions * rowHeight
+                }
+                val nextOffset = offset.pivot(width, height)
+                if (nextOffset != null) {
+                    offset = nextOffset
+                    rectList.add(Rect(offset.x, offset.y, offset.x + width, offset.y + height))
+                } else {
+                    rectList.add(Rect(0, 0, 0, 0))
+                }
+            }
         }
     }
 
@@ -152,37 +167,72 @@ class FlowLayoutManager(
         return viewCache
     }
 
-    private fun updateLayout() {
-        rectList.clear()
-        var offset = LayoutState()
-        for (i in 0..itemCount - 1) {
-            var (width, height) = anInterface.getSizeForChild(i)
-            if (offset.x <= 0) {
-                width += availableWidth - numberOfColumns * columnWidth
+    private fun layoutChildren(recycler: RecyclerView.Recycler) {
+        val viewCache = detachAllChildren()
+        if (orientation == RecyclerView.VERTICAL) {
+            visibleChildren.forEach { itemIndex ->
+                val cachedView = viewCache[itemIndex]
+                if (cachedView == null) {
+                    val view = recycler.getViewForPosition(itemIndex)
+                    val rect = rectList[itemIndex]
+                    view.layoutParams.width = rect.width()
+                    view.layoutParams.height = rect.height()
+                    addView(view)
+                    viewToItemIndexMap[view] = itemIndex
+                    measureChildWithMargins(view, 0, 0)
+                    val top = rect.top - verticalOffset
+                    val bottom = rect.bottom - verticalOffset
+                    layoutDecorated(view, rect.left, top, rect.right, bottom)
+                } else {
+                    attachView(cachedView)
+                    viewCache.remove(itemIndex)
+                }
             }
-            val nextOffset = offset.pivot(width, height)
-            if (nextOffset != null) {
-                offset = nextOffset
-                rectList.add(Rect(offset.x, offset.y, offset.x + width, offset.y + height))
-            } else {
-                rectList.add(Rect(0, 0, 0, 0))
+        } else {
+            visibleChildren.forEach { itemIndex ->
+                val cachedView = viewCache[itemIndex]
+                if (cachedView == null) {
+                    val view = recycler.getViewForPosition(itemIndex)
+                    val rect = rectList[itemIndex]
+                    view.layoutParams.width = rect.width()
+                    view.layoutParams.height = rect.height()
+                    addView(view)
+                    viewToItemIndexMap[view] = itemIndex
+                    measureChildWithMargins(view, 0, 0)
+                    val left = rect.left - horizontalOffset
+                    val right = rect.right - horizontalOffset
+                    layoutDecorated(view, left, rect.top, right, rect.bottom)
+                } else {
+                    attachView(cachedView)
+                    viewCache.remove(itemIndex)
+                }
             }
+        }
+
+        viewCache.forEach { entry ->
+            viewToItemIndexMap.remove(entry.value)
+            recycler.recycleView(entry.value)
         }
     }
 
     /* Return the overall column index of this position in the global layout */
     private fun getGlobalColumnOfPosition(position: Int): Int {
-        return position % numberOfColumns
+        return position % numberOfDivisions
     }
 
     /* Return the overall row index of this position in the global layout */
     private fun getGlobalRowOfPosition(position: Int): Int {
-        return position / numberOfColumns
+        return position / numberOfDivisions
     }
 
     private fun updateVisibleChildren() {
         visibleChildren.clear()
-        val viewport = Rect(0, verticalOffset, availableWidth, verticalOffset + availableHeight)
+        val viewport: Rect
+        if (orientation == RecyclerView.VERTICAL) {
+            viewport = Rect(0, verticalOffset, availableWidth, verticalOffset + availableHeight)
+        } else {
+            viewport = Rect(horizontalOffset, 0, horizontalOffset + availableWidth, availableHeight)
+        }
         for (i in 0..rectList.size - 1) {
             val viewRect = rectList[i]
             if (viewport.intersects(viewRect)) {
@@ -210,7 +260,7 @@ class FlowLayoutManager(
      * in the horizontal direction.
      */
     override fun canScrollHorizontally(): Boolean {
-        return false
+        return orientation == RecyclerView.HORIZONTAL && totalChildrenHeight > availableWidth
     }
 
     /*
@@ -218,7 +268,44 @@ class FlowLayoutManager(
      * in the vertical direction.
      */
     override fun canScrollVertically(): Boolean {
-        return totalChildrenHeight > availableHeight
+        return orientation == RecyclerView.VERTICAL && totalChildrenHeight > availableHeight
+    }
+
+    /*
+     * This method describes how far RecyclerView thinks the contents should scroll horizontally.
+     * You are responsible for verifying edge boundaries, and determining if this scroll
+     * event somehow requires that new views be added or old views get recycled.
+     */
+    override fun scrollHorizontallyBy(dx: Int, recycler: RecyclerView.Recycler, state: RecyclerView.State): Int {
+        if (itemCount <= 0) return 0
+        if (totalChildrenWidth < availableWidth) return 0
+
+        val delta: Int
+        if (dx > 0) { // Scroll viewport left
+            if (horizontalOffset + availableWidth + dx > totalChildrenWidth) {
+                delta = totalChildrenWidth - horizontalOffset - availableWidth
+            } else {
+                delta = dx
+            }
+        } else { // Scroll viewport up
+            if (horizontalOffset + dx <= 0) {
+                delta = -horizontalOffset
+            } else {
+                delta = dx
+            }
+        }
+
+        offsetChildrenHorizontal(-delta)
+        horizontalOffset += delta
+        updateVisibleChildren()
+        layoutChildren(recycler)
+        /*
+         * Return value determines if a boundary has been reached
+         * (for edge effects and flings). If returned value does not
+         * match original delta (passed in), RecyclerView will draw
+         * an edge effect.
+         */
+        return delta
     }
 
     /*
@@ -266,20 +353,35 @@ class FlowLayoutManager(
      */
     override fun scrollToPosition(position: Int) {
         if (position < 0 || position >= rectList.size) {
-            Log.e(TAG, "Cannot scroll to $position, item count is ${rectList.size}")
+            Log.e(TAG, "Cannot scroll to $position, item count is ${rectList.size - 1}")
             return
         }
         val target = rectList[position]
-        val screenBottom = verticalOffset + availableHeight
-        if (target.top >= verticalOffset && target.bottom <= screenBottom) {
-            Log.d("scrollToPosition", "${target.top} don't move")
-            return
-        }
-        val targetHeight = target.bottom - target.top
-        if (target.top < verticalOffset || targetHeight > availableHeight) {
-            verticalOffset = target.top
+
+        if (orientation == RecyclerView.VERTICAL) {
+            val screenBottom = verticalOffset + availableHeight
+            if (target.top >= verticalOffset && target.bottom <= screenBottom) {
+                Log.d("scrollToPosition", "${target.top} don't move")
+                return
+            }
+            val targetHeight = target.bottom - target.top
+            if (target.top < verticalOffset || targetHeight > availableHeight) {
+                verticalOffset = target.top
+            } else {
+                verticalOffset = target.bottom - availableHeight
+            }
         } else {
-            verticalOffset = target.bottom - availableHeight
+            val screenLeft = horizontalOffset + availableWidth
+            if (target.right >= horizontalOffset && target.right <= screenLeft) {
+                Log.d("scrollToPosition", "${target.right} don't move")
+                return
+            }
+            val targetWidth = target.right - target.left
+            if (target.left < horizontalOffset || targetWidth > availableWidth) {
+                horizontalOffset = target.left
+            } else {
+                horizontalOffset = target.right - availableWidth
+            }
         }
 
         //Toss all existing views away
@@ -295,6 +397,7 @@ class FlowLayoutManager(
      * to do the animation calculations.
      */
     override fun smoothScrollToPosition(recyclerView: RecyclerView?, state: RecyclerView.State?, position: Int) {
+        recyclerView ?: return
         if (position < 0 || position >= rectList.size) {
             Log.e(TAG, "Cannot scroll to $position, item count is ${rectList.size}")
             return
@@ -306,7 +409,7 @@ class FlowLayoutManager(
          * of the parent depending on whether the direction of travel was positive
          * or negative.
          */
-        val scroller = object : LinearSmoothScroller(recyclerView!!.context) {
+        val scroller = object : LinearSmoothScroller(recyclerView.context) {
             /*
              * LinearSmoothScroller, at a minimum, just need to know the vector
              * (x/y distance) to travel in order to get from the current positioning
@@ -314,7 +417,8 @@ class FlowLayoutManager(
              */
             override fun computeScrollVectorForPosition(targetPosition: Int): PointF {
                 val target = rectList[targetPosition]
-                return PointF(0F, target.top.toFloat())
+                if (orientation == RecyclerView.VERTICAL) return PointF(0F, target.top.toFloat())
+                return PointF(0F, target.right.toFloat())
             }
         }
         scroller.targetPosition = position
@@ -332,10 +436,16 @@ class FlowLayoutManager(
         get() = height - paddingTop - paddingBottom
 
     private val columnWidth: Int
-        get() = availableWidth / numberOfColumns
+        get() {
+            if (orientation == RecyclerView.VERTICAL) return availableWidth / numberOfDivisions
+            return rowHeight
+        }
 
     private val rowHeight: Int
-        get() = columnWidth
+        get() {
+            if (orientation == RecyclerView.HORIZONTAL) return availableHeight / numberOfDivisions
+            return columnWidth
+        }
 
     private val isFirstLayoutPass: Boolean
         get() = childCount <= 0
@@ -343,36 +453,44 @@ class FlowLayoutManager(
     private val totalChildrenHeight: Int
         get() = rectList.fold(0) { height, rect -> Math.max(height, rect.bottom) }
 
+    private val totalChildrenWidth: Int
+        get() = rectList.fold(0) { width, rect -> Math.max(width, rect.right) }
+
     // endregion
 
     // region LayoutState Utility Class
-
-    fun arrayOfZeros(size: Int): Array<Int> {
-        return Array(size) {
-            0
-        }
-    }
-
-    private inner class LayoutState private constructor(
+    private abstract class LayoutState constructor(
             val x: Int,
-            val y: Int,
-            private var columnLimits: Array<Int>
-
+            val y: Int
     ) {
-        constructor() : this(0, 0, arrayOfZeros(numberOfColumns))
-
-        private fun Iterable<Int>.minIndex(): Int {
+        protected fun Iterable<Int>.minIndex(): Int {
             return zip(0..count() - 1).fold(Pair(Int.MAX_VALUE, -1)) { p, v ->
                 if (p.first > v.first) Pair(v.first, v.second) else p
             }.second
         }
 
-        private fun Iterable<Int>.maxIndex(): Int {
+        protected fun Iterable<Int>.maxIndex(): Int {
             return zip(0..count() - 1).fold(Pair(Int.MIN_VALUE, -1)) { p, v ->
                 if (p.first < v.first) Pair(v.first, v.second) else p
             }.second
         }
 
+        abstract fun pivot(width: Int, height: Int): LayoutState?
+    }
+
+    private fun arrayOfZeros(size: Int): Array<Int> {
+        return Array(size) {
+            0
+        }
+    }
+
+    private inner class VerticalLayoutState private constructor(
+            x: Int,
+            y: Int,
+            private var columnLimits: Array<Int>
+
+    ) : LayoutState(x, y) {
+        constructor() : this(0, 0, arrayOfZeros(numberOfDivisions))
 
         private fun updateColumnLimits(column: Int, width: Int, height: Int) {
             val maxRow = columnLimits.slice(IntRange(column, column + width - 1)).max() ?: 0
@@ -381,7 +499,7 @@ class FlowLayoutManager(
             }
         }
 
-        fun hasSpace(model: List<Int>, col: Int, row: Int, width: Int): Boolean {
+        private fun hasSpace(model: List<Int>, col: Int, row: Int, width: Int): Boolean {
             var remaining = 0
             for (i in col..col + width - 1) {
                 if (i + width - remaining > model.size) return false
@@ -408,19 +526,79 @@ class FlowLayoutManager(
             return null
         }
 
-        fun pivot(width: Int, height: Int): LayoutState? {
+        override fun pivot(width: Int, height: Int): VerticalLayoutState? {
             val w = width / columnWidth
             val h = height / rowHeight
-            if (w > numberOfColumns) {
+            if (w > numberOfDivisions) {
                 return null
             }
             val (pX, pY) = findGapPosition(w) ?: return null
             updateColumnLimits(pX, w, h)
-            return LayoutState(pX * columnWidth, pY * rowHeight, columnLimits)
+            return VerticalLayoutState(pX * columnWidth, pY * rowHeight, columnLimits)
         }
 
         override fun toString(): String {
             return "($x, $y, ${columnLimits.forEachIndexed { position, value ->
+                return ("($position, $value)")
+            }})"
+        }
+    }
+
+    private inner class HorizontalLayoutState private constructor(
+            x: Int,
+            y: Int,
+            private var rowLimits: Array<Int>
+
+    ) : LayoutState(x, y) {
+        constructor() : this(0, 0, arrayOfZeros(numberOfDivisions))
+
+        private fun updateColumnLimits(row: Int, width: Int, height: Int) {
+            val maxCol = rowLimits.slice(IntRange(row, row + height - 1)).max() ?: 0
+            for (i in row..row + height - 1) {
+                rowLimits[i] = maxCol + width
+            }
+        }
+
+        private fun hasSpace(model: List<Int>, col: Int, row: Int, height: Int): Boolean {
+            var remaining = 0
+            for (i in row..row + height - 1) {
+                if (i + height - remaining > model.size) return false
+                if (model[i] > col) return false
+                remaining++
+            }
+            return true
+        }
+
+        private fun findGapPosition(height: Int): Pair<Int, Int>? {
+            val model = rowLimits.toList()
+            val minRow = model.minIndex()
+            val maxRow = model.maxIndex()
+            val minCol = model[minRow]
+            val maxCol = model[maxRow]
+            for (col in minCol..maxCol) {
+                val firstRow = if (col == minCol) minRow else 0
+                for (row in firstRow..model.size - 1) {
+                    if (hasSpace(model, col, row, height)) {
+                        return Pair(col, row)
+                    }
+                }
+            }
+            return null
+        }
+
+        override fun pivot(width: Int, height: Int): HorizontalLayoutState? {
+            val w = width / columnWidth
+            val h = height / rowHeight
+            if (h > numberOfDivisions) {
+                return null
+            }
+            val (pX, pY) = findGapPosition(h) ?: return null
+            updateColumnLimits(pY, w, h)
+            return HorizontalLayoutState(pX * columnWidth, pY * rowHeight, rowLimits)
+        }
+
+        override fun toString(): String {
+            return "($x, $y, ${rowLimits.forEachIndexed { position, value ->
                 return ("($position, $value)")
             }})"
         }
@@ -437,8 +615,8 @@ class FlowLayoutManager(
     // endregion
 
     // region Decoration
-    inner class InsetDecoration(context: Context) : RecyclerView.ItemDecoration() {
 
+    inner class InsetDecoration(context: Context) : RecyclerView.ItemDecoration() {
         private val mInsets: Int
         private var topInset = 0
         private var bottomInset = 0
@@ -456,10 +634,17 @@ class FlowLayoutManager(
             val rect = rectList[index]
             Log.d("Rect", "${rect.top}, ${rect.bottom}, ${rect.left}, ${rect.right}")
 
-            topInset = if (rect.top <= 0) 0 else mInsets / 2
-            bottomInset = if (rect.bottom >= totalChildrenHeight) 0 else mInsets / 2
-            leftInset = if (rect.left <= 0) 0 else mInsets / 2
-            rightInset = if (rect.right >= availableWidth - numberOfColumns) 0 else mInsets / 2
+            if (orientation == RecyclerView.VERTICAL) {
+                leftInset = if (rect.left <= 0) 0 else mInsets / 2
+                topInset = if (rect.top <= 0) 0 else mInsets / 2
+                rightInset = if (rect.right >= availableWidth - numberOfDivisions) 0 else mInsets / 2
+                bottomInset = if (rect.bottom >= totalChildrenHeight) 0 else mInsets / 2
+            } else {
+                leftInset = if (rect.left <= 0) 0 else mInsets / 2
+                topInset = if (rect.top <= 0) 0 else mInsets / 2
+                rightInset = if (rect.right >= totalChildrenWidth) 0 else mInsets / 2
+                bottomInset = if (rect.bottom > availableHeight - numberOfDivisions) 0 else mInsets / 2
+            }
 
             outRect.set(leftInset, topInset, rightInset, bottomInset)
             val params = view.layoutParams
@@ -475,6 +660,8 @@ class FlowLayoutManager(
             }
         }
     }
+
+    // endregion
 
 }
 
