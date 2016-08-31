@@ -1,0 +1,16 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".MainActivity">
+    <item
+        android:id="@+id/orientation_vertical"
+        android:orderInCategory="100"
+        android:title="vertical"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/orientation_horizontal"
+        android:orderInCategory="100"
+        android:title="horizontal"
+        app:showAsAction="ifRoom" />
+</menu>

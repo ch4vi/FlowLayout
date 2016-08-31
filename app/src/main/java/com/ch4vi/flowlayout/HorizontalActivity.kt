@@ -1,6 +1,5 @@
 package com.ch4vi.flowlayout
 
-import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.RecyclerView
@@ -11,7 +10,7 @@ import android.widget.Button
 import android.widget.EditText
 import com.ch4vi.flowlayoutmanager.FlowLayoutManager
 
-class MainActivity : AppCompatActivity() {
+class HorizontalActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,7 +26,7 @@ class MainActivity : AppCompatActivity() {
         recyclerView.itemAnimator.moveDuration = 500
         recyclerView.itemAnimator.removeDuration = 500
 
-        val manager = FlowLayoutManager(3, RecyclerView.VERTICAL, object : FlowLayoutManager.Interface {
+        val manager = FlowLayoutManager(3, RecyclerView.HORIZONTAL, object : FlowLayoutManager.Interface {
             override fun getProportionalSizeForChild(position: Int): Pair<Int, Int> {
                 return when (position) {
                     0 -> Pair(1, 1)
@@ -66,8 +65,8 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         item ?: return true
         when (item.itemId) {
-            R.id.orientation_horizontal -> {
-                startActivity(Intent(this, HorizontalActivity::class.java))
+            R.id.orientation_vertical -> {
+                onBackPressed()
                 return true
             }
             else -> return super.onOptionsItemSelected(item)
