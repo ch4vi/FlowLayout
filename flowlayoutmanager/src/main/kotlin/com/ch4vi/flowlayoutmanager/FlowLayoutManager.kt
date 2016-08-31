@@ -459,6 +459,13 @@ class FlowLayoutManager(
     // endregion
 
     // region LayoutState Utility Class
+
+    private fun arrayOfZeros(size: Int): Array<Int> {
+        return Array(size) {
+            0
+        }
+    }
+
     private abstract class LayoutState constructor(
             val x: Int,
             val y: Int
@@ -476,12 +483,6 @@ class FlowLayoutManager(
         }
 
         abstract fun pivot(width: Int, height: Int): LayoutState?
-    }
-
-    private fun arrayOfZeros(size: Int): Array<Int> {
-        return Array(size) {
-            0
-        }
     }
 
     private inner class VerticalLayoutState private constructor(
