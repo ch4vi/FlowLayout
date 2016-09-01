@@ -5,7 +5,7 @@ FlowLayout – Android Layout Manager
 
 A LayoutManager that must be used with RecyclerView inspired by [Flow Layout for iOS](https://developer.apple.com/library/ios/documentation/WindowsViews/Conceptual/CollectionViewPGforIOS/UsingtheFlowLayout/UsingtheFlowLayout.html).
 
-The layout manager paces cells on a linear path and fits as many cells along
+The layout manager places cells on a linear path and fits as many cells along
 that line as it can. When the layout manager runs out of room on the current
 line, it creates a new line and continues the layout process there.
 
