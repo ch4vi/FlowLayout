@@ -6,8 +6,8 @@ ext {
     bintrayName = 'flowlayout'
 
     publishedGroupId = 'com.ch4vi.flowlayoutmanager'
-    libraryName = 'flowlayout'
-    artifact = 'flowlayout'
+    libraryName = 'flowlayoutmanager'
+    artifact = 'flowlayoutmanager'
 
     libraryDescription = 'An Android Layout Manager to create a gridview with cells of different sizes'
 
