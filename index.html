@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>Flowlayout by ch4vi</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">Flowlayout</h1>
+      <h2 class="project-tagline">An Android Layout Manager to create a gridview with cells of different sizes.</h2>
+      <a href="https://github.com/ch4vi/FlowLayout" class="btn">View on GitHub</a>
+      <a href="https://github.com/ch4vi/FlowLayout/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/ch4vi/FlowLayout/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <h1>
+<a id="flowlayout--android-layout-manager" class="anchor" href="#flowlayout--android-layout-manager" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>FlowLayout – Android Layout Manager</h1>
+
+<p>A LayoutManager that must be used with RecyclerView inspired by <a href="https://developer.apple.com/library/ios/documentation/WindowsViews/Conceptual/CollectionViewPGforIOS/UsingtheFlowLayout/UsingtheFlowLayout.html">Flow Layout for iOS</a>.</p>
+
+<p>The layout manager paces cells on a linear path and fits as many cells along
+that line as it can. When the layout manager runs out of room on the current
+line, it creates a new line and continues the layout process there.</p>
+
+<h2>
+<a id="compile" class="anchor" href="#compile" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Compile</h2>
+
+<p>to-do</p>
+
+<h2>
+<a id="usage" class="anchor" href="#usage" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Usage</h2>
+
+<p>First of all add a RecyclerView to your layout</p>
+
+<div class="highlight highlight-text-xml"><pre>    &lt;<span class="pl-ent">android</span>.support.v7.widget.RecyclerView
+        <span class="pl-e">android</span><span class="pl-e">:</span><span class="pl-e">id</span>=<span class="pl-s"><span class="pl-pds">"</span>@+id/recycler_view<span class="pl-pds">"</span></span>
+        <span class="pl-e">android</span><span class="pl-e">:</span><span class="pl-e">layout_width</span>=<span class="pl-s"><span class="pl-pds">"</span>match_parent<span class="pl-pds">"</span></span>
+        <span class="pl-e">android</span><span class="pl-e">:</span><span class="pl-e">layout_height</span>=<span class="pl-s"><span class="pl-pds">"</span>match_parent<span class="pl-pds">"</span></span>
+        <span class="pl-e">android</span><span class="pl-e">:</span><span class="pl-e">layout_below</span>=<span class="pl-s"><span class="pl-pds">"</span>@+id/button_center<span class="pl-pds">"</span></span>
+        <span class="pl-e">android</span><span class="pl-e">:</span><span class="pl-e">background</span>=<span class="pl-s"><span class="pl-pds">"</span>@color/e<span class="pl-pds">"</span></span>
+        <span class="pl-e">android</span><span class="pl-e">:</span><span class="pl-e">scrollbars</span>=<span class="pl-s"><span class="pl-pds">"</span>vertical<span class="pl-pds">"</span></span> /&gt;</pre></div>
+
+<p>Then in your class initialize the RecyclerView, in this case with 3 columns,
+vertical orientation and the first cell size will be 1x1, the second 2x2...</p>
+
+<div class="highlight highlight-source-Kotlin"><pre>    <span class="pl-k">val</span> <span class="pl-en">manager</span> <span class="pl-k">=</span> FlowLayoutManager(<span class="pl-c1">3</span>, RecyclerView<span class="pl-k">.</span><span class="pl-c1">VERTICAL</span>, object <span class="pl-k">:</span> FlowLayoutManager<span class="pl-k">.</span>Interface {
+        <span class="pl-k">override</span> <span class="pl-k">fun</span> <span class="pl-en">getProportionalSizeForChild</span>(<span class="pl-smi">position</span><span class="pl-k">:</span> <span class="pl-k">Int</span>)<span class="pl-k">:</span> Pair&lt;<span class="pl-k">Int</span>, <span class="pl-k">Int</span>&gt; {
+            <span class="pl-k">return</span> <span class="pl-k">when</span> (position) {
+                 <span class="pl-c1">0</span> <span class="pl-k">-&gt;</span> Pair(<span class="pl-c1">1</span>, <span class="pl-c1">1</span>)
+                 <span class="pl-c1">1</span> <span class="pl-k">-&gt;</span> Pair(<span class="pl-c1">2</span>, <span class="pl-c1">2</span>)
+                 <span class="pl-c1">2</span> <span class="pl-k">-&gt;</span> Pair(<span class="pl-c1">4</span>, <span class="pl-c1">1</span>)
+                 <span class="pl-c1">3</span> <span class="pl-k">-&gt;</span> Pair(<span class="pl-c1">3</span>, <span class="pl-c1">2</span>)
+                 <span class="pl-k">else</span> <span class="pl-k">-&gt;</span> Pair(<span class="pl-c1">1</span>, <span class="pl-c1">1</span>)
+            }
+        }
+    })
+    recyclerView<span class="pl-k">.</span>layoutManager <span class="pl-k">=</span> manager</pre></div>
+
+<p><strong>Note</strong> If we add a cell too big for example if we have 3 columns and 
+we add a cell 4x1, this cell will be ommited in the drawing process.</p>
+
+<p>Optionally you can add a custom space between the cells adding a dimen resource
+named "default_card_insets" and setting an item decoration to your RecyclerView
+like in the example</p>
+
+<div class="highlight highlight-text-xml"><pre>    &lt;<span class="pl-ent">dimen</span> <span class="pl-e">name</span>=<span class="pl-s"><span class="pl-pds">"</span>default_card_insets<span class="pl-pds">"</span></span>&gt;8dp&lt;/<span class="pl-ent">dimen</span>&gt;</pre></div>
+
+<div class="highlight highlight-source-Kotlin"><pre>    recyclerView<span class="pl-k">.</span>addItemDecoration(manager<span class="pl-k">.</span>InsetDecoration(<span class="pl-c1">this</span>))</pre></div>
+
+<h2>
+<a id="demo" class="anchor" href="#demo" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Demo</h2>
+
+<p><img src="https://github.com/ch4vi/FlowLayout/blob/master/snapshots/vertical.gif" width="350" height="650">
+<img src="https://github.com/ch4vi/FlowLayout/blob/master/snapshots/horizontal.gif" width="350" height="650"></p>
+
+<h2>
+<a id="credits" class="anchor" href="#credits" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Credits</h2>
+
+<ul>
+<li><a href="https://github.com/ch4vi">Chavi Anyó</a></li>
+<li><a href="https://github.com/alvivi">Álvaro Vilanova</a></li>
+</ul>
+
+<h2>
+<a id="license" class="anchor" href="#license" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>License</h2>
+
+<p>FlowLayout is license under the Apache License.</p>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/ch4vi/FlowLayout">Flowlayout</a> is maintained by <a href="https://github.com/ch4vi">ch4vi</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+  
+  </body>
+</html>
