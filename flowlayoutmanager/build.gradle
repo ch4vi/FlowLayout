@@ -1,6 +1,30 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 
+ext {
+    bintrayRepo = 'maven'
+    bintrayName = 'flowlayout'
+
+    publishedGroupId = 'com.ch4vi.flowlayoutmanager'
+    libraryName = 'flowlayout'
+    artifact = 'flowlayout'
+
+    libraryDescription = 'An Android Layout Manager to create a gridview with cells of different sizes'
+
+    siteUrl = 'https://ch4vi.github.io/FlowLayout/'
+    gitUrl = 'https://github.com/ch4vi/FlowLayout.git'
+
+    libraryVersion = '1.0.0'
+
+    developerId = 'ch4vi'
+    developerName = 'Chavi Anyo'
+    developerEmail = 'javiguada60@hotmail.com'
+
+    licenseName = 'The Apache Software License, Version 2.0'
+    licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+    allLicenses = ["Apache-2.0"]
+}
+
 android {
     compileSdkVersion 24
     buildToolsVersion "24.0.1"
@@ -38,3 +62,7 @@ dependencies {
 repositories {
     mavenCentral()
 }
+
+// Place it at the end of the file
+apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/installv1.gradle'
+apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/bintrayv1.gradle'

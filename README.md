@@ -1,6 +1,8 @@
 FlowLayout – Android Layout Manager
-====================================
- 
+===================================
+
+[ ![Download](https://api.bintray.com/packages/ch4vi/maven/flowlayout/images/download.svg) ](https://bintray.com/ch4vi/maven/flowlayout/_latestVersion)
+
 A LayoutManager that must be used with RecyclerView inspired by [Flow Layout for iOS](https://developer.apple.com/library/ios/documentation/WindowsViews/Conceptual/CollectionViewPGforIOS/UsingtheFlowLayout/UsingtheFlowLayout.html).
 
 The layout manager paces cells on a linear path and fits as many cells along
