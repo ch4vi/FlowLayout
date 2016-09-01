@@ -54,8 +54,8 @@ like in the example
 
 
 ## Demo ##
-<img src="https://github.com/ch4vi/FlowLayout/blob/master/snapshots/vertical.gif" width="350" height="650">
-<img src="https://github.com/ch4vi/FlowLayout/blob/master/snapshots/horizontal.gif" width="350" height="650">
+<img src="https://raw.githubusercontent.com/ch4vi/FlowLayout/master/snapshots/vertical.gif" width="350" height="650">
+<img src="https://raw.githubusercontent.com/ch4vi/FlowLayout/master/snapshots/horizontal.gif" width="350" height="650">
 
 ## Credits ##
    * [Chavi Anyó](https://github.com/ch4vi)
