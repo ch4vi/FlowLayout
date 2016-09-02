@@ -10,7 +10,22 @@ that line as it can. When the layout manager runs out of room on the current
 line, it creates a new line and continues the layout process there.
 
 ## Compile ##
-to-do
+
+**Using Gradle**
+```
+    compile 'com.ch4vi.flowlayoutmanager:flowlayoutmanager:1.0.0'
+```
+
+**Using Maven**
+```
+    <dependency>
+      <groupId>com.ch4vi.flowlayoutmanager</groupId>
+      <artifactId>flowlayoutmanager</artifactId>
+      <version>1.0.0</version>
+      <type>pom</type>
+    </dependency>
+```
+
 
 ## Usage ##
 First of all add a RecyclerView to your layout
