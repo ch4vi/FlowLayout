@@ -14,7 +14,7 @@ ext {
     siteUrl = 'https://ch4vi.github.io/FlowLayout/'
     gitUrl = 'https://github.com/ch4vi/FlowLayout.git'
 
-    libraryVersion = '1.0.0'
+    libraryVersion = '1.0.1'
 
     developerId = 'ch4vi'
     developerName = 'Chavi Anyo'
@@ -33,7 +33,7 @@ android {
         minSdkVersion 10
         targetSdkVersion 24
         versionCode 1
-        versionName "1.0"
+        versionName "1.0.1"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
