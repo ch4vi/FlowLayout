@@ -12,6 +12,9 @@ line, it creates a new line and continues the layout process there.
 ## Compile ##
 
 **Using Gradle**
+
+_Requires Min SDK version >= 10_
+
 ```
     compile 'com.ch4vi.flowlayoutmanager:flowlayoutmanager:1.0.0'
 ```
