@@ -420,7 +420,7 @@ class FlowLayoutManager(
             override fun computeScrollVectorForPosition(targetPosition: Int): PointF {
                 val target = rectList[targetPosition]
                 if (orientation == RecyclerView.VERTICAL) return PointF(0F, target.top.toFloat())
-                return PointF(0F, target.right.toFloat())
+                return PointF(target.right.toFloat(), 0F)
             }
         }
         scroller.targetPosition = position
