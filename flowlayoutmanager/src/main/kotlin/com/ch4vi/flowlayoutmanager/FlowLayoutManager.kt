@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package com.ch4vi.flowlayoutmanager
 
 import android.content.Context
@@ -501,11 +503,9 @@ class FlowLayoutManager(
         }
 
         private fun hasSpace(model: List<Int>, col: Int, row: Int, width: Int): Boolean {
-            var remaining = 0
-            for (i in col..col + width - 1) {
+            for ((remaining, i) in (col..col + width - 1).withIndex()) {
                 if (i + width - remaining > model.size) return false
                 if (model[i] > row) return false
-                remaining++
             }
             return true
         }
@@ -518,11 +518,9 @@ class FlowLayoutManager(
             val maxRow = model[maxCol]
             for (row in minRow..maxRow) {
                 val firstCol = if (row == minRow) minCol else 0
-                for (col in firstCol..model.size - 1) {
-                    if (hasSpace(model, col, row, width)) {
-                        return Pair(col, row)
-                    }
-                }
+                (firstCol..model.size - 1)
+                        .filter { hasSpace(model, it, row, width) }
+                        .forEach { return Pair(it, row) }
             }
             return null
         }
@@ -561,11 +559,9 @@ class FlowLayoutManager(
         }
 
         private fun hasSpace(model: List<Int>, col: Int, row: Int, height: Int): Boolean {
-            var remaining = 0
-            for (i in row..row + height - 1) {
+            for ((remaining, i) in (row..row + height - 1).withIndex()) {
                 if (i + height - remaining > model.size) return false
                 if (model[i] > col) return false
-                remaining++
             }
             return true
         }
@@ -578,11 +574,9 @@ class FlowLayoutManager(
             val maxCol = model[maxRow]
             for (col in minCol..maxCol) {
                 val firstRow = if (col == minCol) minRow else 0
-                for (row in firstRow..model.size - 1) {
-                    if (hasSpace(model, col, row, height)) {
-                        return Pair(col, row)
-                    }
-                }
+                (firstRow..model.size - 1)
+                        .filter { hasSpace(model, col, it, height) }
+                        .forEach { return Pair(col, it) }
             }
             return null
         }
@@ -617,6 +611,7 @@ class FlowLayoutManager(
 
     // region Decoration
 
+    @Suppress("JoinDeclarationAndAssignment")
     inner class InsetDecoration(context: Context) : RecyclerView.ItemDecoration() {
         private val mInsets: Int
         private var topInset = 0
@@ -663,7 +658,6 @@ class FlowLayoutManager(
     }
 
     // endregion
-
 }
 
 fun <K, V> Map<K, V>?.findKeyByValue(value: V): K? {
