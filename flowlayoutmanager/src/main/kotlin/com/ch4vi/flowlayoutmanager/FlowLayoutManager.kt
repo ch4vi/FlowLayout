@@ -262,7 +262,7 @@ class FlowLayoutManager(
      * in the horizontal direction.
      */
     override fun canScrollHorizontally(): Boolean {
-        return orientation == RecyclerView.HORIZONTAL && totalChildrenHeight > availableWidth
+        return orientation == RecyclerView.HORIZONTAL && totalChildrenWidth > availableWidth
     }
 
     /*
