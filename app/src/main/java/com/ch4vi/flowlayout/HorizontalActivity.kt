@@ -39,7 +39,7 @@ class HorizontalActivity : AppCompatActivity() {
         })
         recyclerView.layoutManager = manager
         recyclerView.addItemDecoration(manager.InsetDecoration(this))
-        recyclerView.adapter = Adapter((0..30).map { it.toString() }.toTypedArray())
+        recyclerView.adapter = Adapter((0..30).map(Int::toString).toTypedArray())
 
         val input = findViewById(R.id.input) as EditText
         val leftButton = findViewById(R.id.button_left) as Button
