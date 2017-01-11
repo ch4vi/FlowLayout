@@ -14,7 +14,7 @@ ext {
     siteUrl = 'https://ch4vi.github.io/FlowLayout/'
     gitUrl = 'https://github.com/ch4vi/FlowLayout.git'
 
-    libraryVersion = '1.0.1'
+    libraryVersion = '1.0.2'
 
     developerId = 'ch4vi'
     developerName = 'Chavi Anyo'
